@@ -16,7 +16,7 @@ plt.ylabel("Order_Number")
 plt.tight_layout()
 plt.savefig("RFM_Value.png")
 
-plt.figure()
+plt.figure() # starting new figure
 
 #Distribution plot for R,F,& M
 
