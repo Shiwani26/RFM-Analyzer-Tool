@@ -149,7 +149,7 @@ def simple_rfm_analysis(filepath="CUSID_Amts.xlsx"):
 ```
 
 ### Bar Graph 
-![RFM_Value](https://github.com/user-attachments/assets/ed8a408d-d6e9-4725-84ab-dbd1744e60fc)
+![RFM_Value](RFM_Value.png)
 
 ### Box Plot
 
