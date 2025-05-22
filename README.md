@@ -51,137 +51,10 @@ df["Date"] = pd.to_datetime(df["Date"])
 df = df.groupby("Customer_ID").agg({"Amount":"sum", "Date": "max", "Customer_ID" : "count"}).rename(columns={"Customer_ID":"Order_Number"}).reset_index()  # Data processin
   
 print(df.head())
-```
-
-
-## ⚙️ How It Works
-
-### 1. Recency, Frequency and Monetary Calculation (Data_Scrorer.Py)
-```python
-import pandas as pd 
-import datetime
-from Load_Data import df
-
-
-df["R"] = (pd.Timestamp.now() - pd.to_datetime(df["Date"])).dt.days  # calculating the Recency
-
-def calculate_score(df, column_name="R"):
-    # Calculate percentiles (using PERCENTILE.EXC equivalent)
-    percentiles = df[column_name].quantile([0.2, 0.4, 0.6, 0.8], interpolation='higher')
-    
-    def get_score(x):
-        if x > percentiles[0.8]: return 5
-        elif x > percentiles[0.6]: return 4
-        elif x > percentiles[0.4]: return 3
-        elif x > percentiles[0.2]: return 2
-        else: return 1
-    
-    return df[column_name].apply(get_score)
-
-df['Recency'] = calculate_score(df, "R")
-df['Recency']
-
-# calculating the Frequency (F): Represents how often a customer has made purchases.
-df["F"] = df["Order_Number"]
-
-# Calculating percentile for Frequency
-def calculate_score(df, column_name="F"):
-    # Calculate percentiles (using PERCENTILE.EXC equivalent)
-    percentiles = df[column_name].quantile([0.2, 0.4, 0.6, 0.8], interpolation='higher')
-    
-    def get_score(x):
-        if x > percentiles[0.8]: return 5
-        elif x > percentiles[0.6]: return 4
-        elif x > percentiles[0.4]: return 3
-        elif x > percentiles[0.2]: return 2
-        else: return 1
-    
-    return df[column_name].apply(get_score)
-
-
-df['Frequency'] = calculate_score(df, "F")
-df['Frequency']
-
-# calculating Monetary ((the amount spent on purchases))
-df["M"] = df["Amount"]
-
-# calculating the percentile for Monetary
-def calculate_score(df, column_name="M"):
-    # Calculate percentiles (using PERCENTILE.EXC equivalent)
-    percentiles = df[column_name].quantile([0.2, 0.4, 0.6, 0.8], interpolation='higher')
-    
-    def get_score(x):
-        if x > percentiles[0.8]: return 5
-        elif x > percentiles[0.6]: return 4
-        elif x > percentiles[0.4]: return 3
-        elif x > percentiles[0.2]: return 2
-        else: return 1
-    
-    return df[column_name].apply(get_score)
-
-
-df['Monetary'] = calculate_score(df, "M")
-df['Monetary']
-
-# Assuming your DataFrame is called df and has columns 'Recency', 'Frequency', and 'Monetary'
-df['RFM_Score'] = df['Recency'].astype(str) + df['Frequency'].astype(str) + df['Monetary'].astype(str)
-df["RFM_Score"]
-
-#Classification of RFM Scores
-
-def categorize_customers(row):
-    if row['Recency'] == 5 and row['Frequency'] >= 4 and row['Monetary'] >= 4:
-        return "Best Customers"
-    elif 3 <= row['Recency'] <= 4 and row['Frequency'] >= 4 and row['Monetary'] >= 3:
-        return "Loyal Customers"
-    elif 3 <= row['Recency'] <= 4 and row['Frequency'] >= 2 and row['Monetary'] >= 2:
-        return "Potential Loyal Customers"
-    elif 2 <= row['Recency'] <= 3 and row['Frequency'] >= 3 and row['Monetary'] >= 3:
-        return "At-Risk Customers"
-    elif row['Recency'] == 1 and row['Frequency'] <= 2 and row['Monetary'] <= 2:
-        return "Lost Customers"
-    else:
-        return "Unclassified"
-
-# Usage:
-df['Customer_Category'] = df.apply(categorize_customers, axis= 1)
-
-# Counting the values
-df["Customer_Category"].value_counts()
-df["Customer_Category"]
 
 ```
-### 2. Visualization (Result.Py)
 
-``` Python
-# Visual Representations
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from Data_Scorer import df
 
-# BarChart
-plt.figure(figsize=(15, 10))
-plt.bar(df["Customer_Category"], df["Order_Number"]) 
-plt.title('RFM Value Segment Distribution')
-plt.xlabel("Customer_Category")
-plt.ylabel("Order_Number")
-plt.tight_layout()
-plt.savefig("RFM_Value.png")
-
-```
-![RFM_Value](https://github.com/user-attachments/assets/ed8a408d-d6e9-4725-84ab-dbd1744e60fc)
-
-``` Python
-#Distribution plot for R,F,& M
-
-plot = sns.boxplot(data=df[['Recency', 'Frequency', 'Monetary']])
-plot.set_title('Distribution of RFM Scores')
-plot.set_ylabel('Score')
-plt.savefig("Distribution.png")
-
-```
-![Distribution](https://github.com/user-attachments/assets/87dba951-96a5-4b17-8cbe-c30ceac5f803)
 
 
 ### RFM Module (RFM Module.py)
@@ -274,9 +147,18 @@ def simple_rfm_analysis(filepath="CUSID_Amts.xlsx"):
 # print(results.head())
 
 ```
+
+### Bar Graph 
+![RFM_Value](https://github.com/user-attachments/assets/ed8a408d-d6e9-4725-84ab-dbd1744e60fc)
+
+### Box Plot
+
+![Distribution](https://github.com/user-attachments/assets/87dba951-96a5-4b17-8cbe-c30ceac5f803)
 ### Final Step (Main.py)
 
-This script performs an RFM (Recency, Frequency, Monetary) analysis on a file provided via the command line. It starts by importing the `sys` module to handle command-line arguments and the `simple_rfm_analysis` function from the `RFM_Module` to perform the analysis. The script checks if a file path is passed as an argument; if not, it exits. If the file path is provided, it calls the `simple_rfm_analysis()` function with the file path as input, processes the data, and stores the RFM analysis results in a variable. Finally, the script prints the first few rows of the analysis results using `head()`. To run the script, the user would provide the file path in the command line, like `python script_name.py path_to_excel_file.xlsx`, Example:  `python Main.Py CUSID_Amts.xlsx`  and the results will be displayed in the terminal.
+This script performs an RFM (Recency, Frequency, Monetary) analysis on a file provided via the command line. It starts by importing the `sys` module to handle command-line arguments and the `simple_rfm_analysis` function from the `RFM_Module` to perform the analysis. The script checks if a file path is passed as an argument; if not, it exits. If the file path is provided, it calls the `simple_rfm_analysis()` function with the file path as input, processes the data, and stores the RFM analysis results in a variable. Finally, the script prints the first few rows of the analysis results using `head()`. To run the script, the user would provide the file path in the command line, like `python script_name.py path_to_excel_file.xlsx`, Example:  `python Main.Py CUSID_Amts.xlsx`  and the results will be displayed in the terminal. Furthermore the code snippet saves the results of an RFM analysis to an Excel file named rfm_output.xlsx. It begins by defining the file name and then prints the full file path using os.path.abspath(), which helps confirm where the file will be stored on the system. Finally, it uses the to_excel() function from the pandas library to export the DataFrame result_df to the specified Excel file. The parameter index=False ensures that the row indices are not included in the Excel output, resulting in a cleaner and more readable file. This step is useful for sharing, storing, or further analyzing the output from the RFM analysis.
+
+
 
 
 ``` Python
@@ -312,8 +194,7 @@ print(result_df.head())
 ## Conclusion
 
 The RFM Analyzer Tool represents a significant advancement in making data-driven customer segmentation accessible to businesses of all sizes. By consolidating what was previously a complex, multi-step process into a single, user-friendly function, this tool eliminates technical barriers and empowers marketing teams to make informed decisions based on customer behavior patterns.
-RFM analysis is a powerful technique that helps businesses identify their most valuable customers, recognize those at risk of churning, and spot opportunities for growth. However, its implementation has traditionally required technical expertise that many small and medium businesses lack. This tool bridges that gap, democratizing access to sophisticated customer analytics.
-With minimal setup and just a few lines of code, users can transform raw customer transaction data into actionable insights. This enables businesses to:
+RFM analysis is a powerful technique that helps businesses identify their most valuable customers, recognize those at risk of churning, and spot opportunities for growth. However, its implementation has traditionally required technical expertise that many small and medium businesses lack. This tool bridges that gap, democratizing access to sophisticated customer analytics.With minimal setup and just a few lines of code, users can transform raw customer transaction data into actionable insights. This enables businesses to:
 
 Target their best customers with retention programs
 Re-engage at-risk customers before they're lost
