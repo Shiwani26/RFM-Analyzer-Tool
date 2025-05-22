@@ -12,8 +12,5 @@ file_path = sys.argv[1]
 # Run the RFM analysis
 result_df = simple_rfm_analysis(file_path)
 
-
-# Print first few rows
+# Show first few rows
 print(result_df.head())
-
-
