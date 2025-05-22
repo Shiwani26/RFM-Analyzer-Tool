@@ -153,7 +153,7 @@ def simple_rfm_analysis(filepath="CUSID_Amts.xlsx"):
 
 ### Box Plot
 
-![Distribution](https://github.com/user-attachments/assets/87dba951-96a5-4b17-8cbe-c30ceac5f803)
+![Distribution](Distribution.png)
 ### Final Step (Main.py)
 
 This script performs an RFM (Recency, Frequency, Monetary) analysis on a file provided via the command line. It starts by importing the `sys` module to handle command-line arguments and the `simple_rfm_analysis` function from the `RFM_Module` to perform the analysis. The script checks if a file path is passed as an argument; if not, it exits. If the file path is provided, it calls the `simple_rfm_analysis()` function with the file path as input, processes the data, and stores the RFM analysis results in a variable. Finally, the script prints the first few rows of the analysis results using `head()`. To run the script, the user would provide the file path in the command line, like `python script_name.py path_to_excel_file.xlsx`, Example:  `python Main.Py CUSID_Amts.xlsx`  and the results will be displayed in the terminal. Furthermore the code snippet saves the results of an RFM analysis to an Excel file named rfm_output.xlsx. It begins by defining the file name and then prints the full file path using os.path.abspath(), which helps confirm where the file will be stored on the system. Finally, it uses the to_excel() function from the pandas library to export the DataFrame result_df to the specified Excel file. The parameter index=False ensures that the row indices are not included in the Excel output, resulting in a cleaner and more readable file. This step is useful for sharing, storing, or further analyzing the output from the RFM analysis.
